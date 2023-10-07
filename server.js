@@ -35,18 +35,6 @@ const io = require('socket.io')(server, {
   cors: corsOptions, // Utiliza las mismas opciones de CORS aquí
 });
 
-const https = require('https'); // Importa el módulo 'https'
-const server = https.createServer(app); // Crea el servidor con 'https'
-
-const io = require('socket.io')(server, {
-  cors: {
-    origin: 'https://brandmonkeydigital.com',
-    credentials: true
-  }
-});
-
-
-
 app.post("/verify/:phoneNumber", async (req, res) => {
   try {
       const { phoneNumber } = req.params;
@@ -65,7 +53,6 @@ app.post("/verify/:phoneNumber", async (req, res) => {
   }
 });
 
-
 app.post('/check/:phoneNumber/:code', async (req, res) => {
   try {
       const { phoneNumber, code } = req.params;
@@ -82,7 +69,6 @@ app.post('/check/:phoneNumber/:code', async (req, res) => {
       console.log(error)
   }
 });
-
 
 async function getLastMessagesFromRoom(room){
   let roomMessages = await Message.aggregate([
@@ -130,7 +116,6 @@ io.on('connection', (socket)=> {
     io.to(room).emit('room-messages', roomMessages);
     socket.broadcast.emit('notifications', room)
   })
-  
 
   app.delete('/logout', async(req, res)=> {
     try {
@@ -150,16 +135,13 @@ io.on('connection', (socket)=> {
 
 })
 
-
 app.get('/rooms', (req, res)=> {
   res.json(rooms)
 })
 
-
 server.listen(PORT, ()=> {
   console.log('listening to port', PORT)
 })
-
 
 const CHATGPT_KEY = chatGptKey;
 
@@ -172,7 +154,6 @@ app.post('/chatgpt', async (req, res) => {
     "response": callGptResponse
   });
 });
-
 
 async function callToChatGpt(message) {
   const bodyRequest = {
