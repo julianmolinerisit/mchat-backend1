@@ -107,4 +107,48 @@ io.on('connection', (socket) => {
   })
 
   socket.on('message-room', async (room, content, sender, time, date) => {
-    const newMessage = await Message.create({ content, from: sender, time, date, to
+    const newMessage = await Message.create({ content, from: sender, time, date, to: room });
+    let roomMessages = await getLastMessagesFromRoom(room);
+    roomMessages = sortRoomMessagesByDate(roomMessages);
+    // sending message to room
+    io.to(room).emit('room-messages', roomMessages);
+    socket.broadcast.emit('notifications', room)
+  })
+
+  app.delete('/logout', async (req, res) => {
+    try {
+      const { _id, newMessages } = req.body;
+      const user = await User.findById(_id);
+      user.status = "offline";
+      user.newMessages = newMessages;
+      await user.save();
+      const members = await User.find();
+      socket.broadcast.emit('new-user', members);
+      res.status(200).send();
+    } catch (e) {
+      console.log(e);
+      res.status(400).send()
+    }
+  })
+
+})
+
+app.get('/rooms', (req, res) => {
+  res.json(rooms)
+})
+
+const CHATGPT_KEY = chatGptKey;
+
+app.use(express.json());
+
+app.post('/chatgpt', async (req, res) => {
+  const userMessage = req.body.message;
+  const callGptResponse = await callToChatGpt(userMessage);
+  res.json({
+    "response": callGptResponse
+  });
+});
+
+server.listen(443, () => {
+  console.log('listening to port 443');
+});
