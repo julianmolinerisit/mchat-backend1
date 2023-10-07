@@ -23,13 +23,16 @@ app.use(cors());
 app.use('/users', userRoutes);
 require('./connection');
 
-const server = require('http').createServer(app);
+const https = require('https'); // Importa el módulo 'https'
+const server = https.createServer(app); // Crea el servidor con 'https'
+
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'https://brandmonkeydigital.com', // Actualiza esto con la URL real de tu frontend en producción
     methods: ['GET', 'POST']
   }
 });
+
 
 app.post("/verify/:phoneNumber", async (req, res) => {
   try {
