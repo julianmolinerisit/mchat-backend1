@@ -17,9 +17,10 @@ const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 // Configuración de CORS
 const corsOptions = {
-  origin: 'https://brandmonkeydigital.com', // Actualiza esto con la URL real de tu frontend en producción
+  origin: '*', // Actualiza esto con la URL real de tu frontend en producción
   credentials: true,
 };
+
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
