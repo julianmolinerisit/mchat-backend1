@@ -11,7 +11,7 @@ dotenv.config();
 const twilio = require('twilio');
 const chatGptKey = process.env.CHATGPT_KEY;
 
-const { PORT, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
 
 const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
@@ -107,76 +107,4 @@ io.on('connection', (socket) => {
   })
 
   socket.on('message-room', async (room, content, sender, time, date) => {
-    const newMessage = await Message.create({ content, from: sender, time, date, to: room });
-    let roomMessages = await getLastMessagesFromRoom(room);
-    roomMessages = sortRoomMessagesByDate(roomMessages);
-    // sending message to room
-    io.to(room).emit('room-messages', roomMessages);
-    socket.broadcast.emit('notifications', room)
-  })
-
-  app.delete('/logout', async (req, res) => {
-    try {
-      const { _id, newMessages } = req.body;
-      const user = await User.findById(_id);
-      user.status = "offline";
-      user.newMessages = newMessages;
-      await user.save();
-      const members = await User.find();
-      socket.broadcast.emit('new-user', members);
-      res.status(200).send();
-    } catch (e) {
-      console.log(e);
-      res.status(400).send()
-    }
-  })
-
-})
-
-app.get('/rooms', (req, res) => {
-  res.json(rooms)
-})
-
-const CHATGPT_KEY = chatGptKey;
-
-app.use(express.json());
-
-app.post('/chatgpt', async (req, res) => {
-  const userMessage = req.body.message;
-  const callGptResponse = await callToChatGpt(userMessage);
-  res.json({
-    "response": callGptResponse
-  });
-});
-
-async function callToChatGpt(message) {
-  const bodyRequest = {
-    model: 'gpt-3.5-turbo',
-    max_tokens: 50,
-    messages: [
-      { role: 'user', content: message }
-    ],
-  };
-
-  const request = {
-    method: 'POST',
-    headers: {
-      'Content-type': 'application/json',
-      Authorization: `Bearer ${CHATGPT_KEY}`,
-    },
-    body: JSON.stringify(bodyRequest),
-  };
-
-  try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', request);
-    const json = await response.json();
-    return json.choices[0].message.content;
-  } catch (error) {
-    console.error('Error al llamar a la API:', error);
-    return 'Error en la solicitud a la API.';
-  }
-}
-
-server.listen(PORT, () => {
-  console.log('listening to port', PORT)
-})
+    const newMessage = await Message.create({ content, from: sender, time, date, to
