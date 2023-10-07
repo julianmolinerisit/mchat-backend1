@@ -23,10 +23,10 @@ app.use(cors());
 app.use('/users', userRoutes);
 require('./connection');
 
-const server = require('https').createServer(app);
+const server = require('http').createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: '*',
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST']
   }
 });
