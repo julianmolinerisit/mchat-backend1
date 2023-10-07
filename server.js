@@ -5,23 +5,35 @@ const User = require('./models/User');
 const Message = require('./models/Message');
 const rooms = ['general', 'tech', 'finance', 'crypto', 'MonkIA'];
 const fetch = require('node-fetch');
-const cors = require('cors');
+const cors = require('cors'); // Importa el módulo 'cors'
 const dotenv = require('dotenv');
 dotenv.config();
 const twilio = require('twilio');
 const chatGptKey = process.env.CHATGPT_KEY;
 
-
 const { PORT, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
 
 const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
+// Configuración de CORS
+const corsOptions = {
+  origin: 'https://brandmonkeydigital.com', // Actualiza esto con la URL real de tu frontend en producción
+  credentials: true,
+};
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions)); // Aplica la configuración de CORS
 
 app.use('/users', userRoutes);
 require('./connection');
+
+const https = require('https'); // Importa el módulo 'https'
+const server = https.createServer(app); // Crea el servidor con 'https'
+
+const io = require('socket.io')(server, {
+  cors: corsOptions, // Utiliza las mismas opciones de CORS aquí
+});
 
 const https = require('https'); // Importa el módulo 'https'
 const server = https.createServer(app); // Crea el servidor con 'https'
