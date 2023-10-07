@@ -33,7 +33,6 @@ const io = require('socket.io')(server, {
   }
 });
 
-app.use(cors(corsOptions));
 
 
 app.post("/verify/:phoneNumber", async (req, res) => {
