@@ -5,36 +5,31 @@ const User = require('./models/User');
 const Message = require('./models/Message');
 const rooms = ['general', 'tech', 'finance', 'crypto', 'MonkIA'];
 const fetch = require('node-fetch');
-const cors = require('cors'); // Importa el módulo 'cors'
+const cors = require('cors');
 const dotenv = require('dotenv');
 dotenv.config();
 const twilio = require('twilio');
 const chatGptKey = process.env.CHATGPT_KEY;
 
+
 const { PORT, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
 
 const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
-// Configuración de CORS
-const corsOptions = {
-  origin: '*', // Actualiza esto con la URL real de tu frontend en producción
-  credentials: true,
-};
-
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors(corsOptions)); // Aplica la configuración de CORS
+app.use(cors());
 
 app.use('/users', userRoutes);
 require('./connection');
 
-const https = require('https'); // Importa el módulo 'https'
-const server = https.createServer(app); // Crea el servidor con 'https'
-
-// Configura socket.io con CORS
+const https = require('https');
+const server = require('https').createServer(app);
 const io = require('socket.io')(server, {
-  cors: corsOptions,
+  cors: {
+    origin: '*',
+    methods: ['GET', 'POST']
+  }
 });
 
 app.post("/verify/:phoneNumber", async (req, res) => {
@@ -55,6 +50,7 @@ app.post("/verify/:phoneNumber", async (req, res) => {
   }
 });
 
+
 app.post('/check/:phoneNumber/:code', async (req, res) => {
   try {
       const { phoneNumber, code } = req.params;
@@ -71,6 +67,7 @@ app.post('/check/:phoneNumber/:code', async (req, res) => {
       console.log(error)
   }
 });
+
 
 async function getLastMessagesFromRoom(room){
   let roomMessages = await Message.aggregate([
@@ -118,6 +115,7 @@ io.on('connection', (socket)=> {
     io.to(room).emit('room-messages', roomMessages);
     socket.broadcast.emit('notifications', room)
   })
+  
 
   app.delete('/logout', async(req, res)=> {
     try {
@@ -137,13 +135,16 @@ io.on('connection', (socket)=> {
 
 })
 
+
 app.get('/rooms', (req, res)=> {
   res.json(rooms)
 })
 
+
 server.listen(PORT, ()=> {
   console.log('listening to port', PORT)
 })
+
 
 const CHATGPT_KEY = chatGptKey;
 
@@ -156,6 +157,7 @@ app.post('/chatgpt', async (req, res) => {
     "response": callGptResponse
   });
 });
+
 
 async function callToChatGpt(message) {
   const bodyRequest = {
