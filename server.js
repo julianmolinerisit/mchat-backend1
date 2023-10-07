@@ -11,14 +11,16 @@ dotenv.config();
 const twilio = require('twilio');
 const chatGptKey = process.env.CHATGPT_KEY;
 
-
 const { PORT, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
 
 const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'https://brandmonkeydigital.com', // Cambia esto a la URL de tu frontend en Hostinger
+  methods: ['GET', 'POST']
+}));
 
 app.use('/users', userRoutes);
 require('./connection');
@@ -26,63 +28,61 @@ require('./connection');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'https://brandmonkeydigital.com', // Cambia esto a la URL de tu frontend en Hostinger
     methods: ['GET', 'POST']
   }
 });
 
 app.post("/verify/:phoneNumber", async (req, res) => {
   try {
-      const { phoneNumber } = req.params;
+    const { phoneNumber } = req.params;
 
-      // Send verification code via Twilio
-      const verification = await twilioClient.verify.services(TWILIO_SERVICE_SID)
-          .verifications.create({
-              to: phoneNumber,
-              channel: "whatsapp"
-          });
+    // Send verification code via Twilio
+    const verification = await twilioClient.verify.services(TWILIO_SERVICE_SID)
+      .verifications.create({
+        to: phoneNumber,
+        channel: "whatsapp"
+      });
 
-      res.json(verification); // Return verification status
+    res.json(verification); // Return verification status
   } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: "An error occurred." });
+    console.log(error);
+    res.status(500).json({ error: "An error occurred." });
   }
 });
-
 
 app.post('/check/:phoneNumber/:code', async (req, res) => {
   try {
-      const { phoneNumber, code } = req.params;
-      const { status } = await twilioClient.verify.v2.services(TWILIO_SERVICE_SID).verificationChecks.create({
-          to: phoneNumber,
-          code
-      })
-      if (status == "approved") {
-          res.json({ status })
-      } else {
-          res.status(401).json({ status: "Invalid" })
-      }
+    const { phoneNumber, code } = req.params;
+    const { status } = await twilioClient.verify.v2.services(TWILIO_SERVICE_SID).verificationChecks.create({
+      to: phoneNumber,
+      code
+    })
+    if (status == "approved") {
+      res.json({ status })
+    } else {
+      res.status(401).json({ status: "Invalid" })
+    }
   } catch (error) {
-      console.log(error)
+    console.log(error)
   }
 });
 
-
-async function getLastMessagesFromRoom(room){
+async function getLastMessagesFromRoom(room) {
   let roomMessages = await Message.aggregate([
-    {$match: {to: room}},
-    {$group: {_id: '$date', messagesByDate: {$push: '$$ROOT'}}}
+    { $match: { to: room } },
+    { $group: { _id: '$date', messagesByDate: { $push: '$$ROOT' } } }
   ])
   return roomMessages;
 }
 
-function sortRoomMessagesByDate(messages){
-  return messages.sort(function(a, b){
+function sortRoomMessagesByDate(messages) {
+  return messages.sort(function (a, b) {
     let date1 = a._id.split('/');
     let date2 = b._id.split('/');
 
     date1 = date1[2] + date1[0] + date1[1]
-    date2 =  date2[2] + date2[0] + date2[1];
+    date2 = date2[2] + date2[0] + date2[1];
 
     return date1 < date2 ? -1 : 1
   })
@@ -90,15 +90,15 @@ function sortRoomMessagesByDate(messages){
 
 // socket connection
 
-io.on('connection', (socket)=> {
+io.on('connection', (socket) => {
   console.log('A user connected');
 
-  socket.on('new-user', async ()=> {
+  socket.on('new-user', async () => {
     const members = await User.find();
     io.emit('new-user', members)
   })
 
-  socket.on('join-room', async(newRoom, previousRoom)=> {
+  socket.on('join-room', async (newRoom, previousRoom) => {
     socket.join(newRoom);
     socket.leave(previousRoom);
     let roomMessages = await getLastMessagesFromRoom(newRoom);
@@ -106,19 +106,18 @@ io.on('connection', (socket)=> {
     socket.emit('room-messages', roomMessages)
   })
 
-  socket.on('message-room', async(room, content, sender, time, date) => {
-    const newMessage = await Message.create({content, from: sender, time, date, to: room});
+  socket.on('message-room', async (room, content, sender, time, date) => {
+    const newMessage = await Message.create({ content, from: sender, time, date, to: room });
     let roomMessages = await getLastMessagesFromRoom(room);
     roomMessages = sortRoomMessagesByDate(roomMessages);
     // sending message to room
     io.to(room).emit('room-messages', roomMessages);
     socket.broadcast.emit('notifications', room)
   })
-  
 
-  app.delete('/logout', async(req, res)=> {
+  app.delete('/logout', async (req, res) => {
     try {
-      const {_id, newMessages} = req.body;
+      const { _id, newMessages } = req.body;
       const user = await User.findById(_id);
       user.status = "offline";
       user.newMessages = newMessages;
@@ -134,16 +133,9 @@ io.on('connection', (socket)=> {
 
 })
 
-
-app.get('/rooms', (req, res)=> {
+app.get('/rooms', (req, res) => {
   res.json(rooms)
 })
-
-
-server.listen(PORT, ()=> {
-  console.log('listening to port', PORT)
-})
-
 
 const CHATGPT_KEY = chatGptKey;
 
@@ -156,7 +148,6 @@ app.post('/chatgpt', async (req, res) => {
     "response": callGptResponse
   });
 });
-
 
 async function callToChatGpt(message) {
   const bodyRequest = {
@@ -185,3 +176,7 @@ async function callToChatGpt(message) {
     return 'Error en la solicitud a la API.';
   }
 }
+
+server.listen(PORT, () => {
+  console.log('listening to port', PORT)
+})
