@@ -29,8 +29,10 @@ const server = https.createServer(app); // Crea el servidor con 'https'
 const io = require('socket.io')(server, {
   cors: {
     origin: 'https://brandmonkeydigital.com', // Actualiza esto con la URL real de tu frontend en producción
-    methods: ['GET', 'POST']
-  }
+    credentials: true
+};
+
+app.use(cors(corsOptions));
 });
 
 
