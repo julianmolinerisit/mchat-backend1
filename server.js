@@ -18,25 +18,17 @@ const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors({
-  origin: 'https://brandmonkeydigital.com', // Change this to your frontend URL
+  origin: 'https://brandmonkeydigital.com', // Cambia esto a la URL de tu frontend en Hostinger
   methods: ['GET', 'POST']
 }));
 
 app.use('/users', userRoutes);
 require('./connection');
 
-const https = require('https');
-const fs = require('fs');
-
-const options = {
-  key: fs.readFileSync('/path/to/private-key.key'), // Replace with the path to your private key file
-  cert: fs.readFileSync('/path/to/certificate.crt'), // Replace with the path to your certificate file
-};
-
-const server = https.createServer(options, app);
+const server = require('https').createServer(app); // Use 'https' instead of 'http'
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'https://brandmonkeydigital.com', // Change this to your frontend URL
+    origin: 'https://brandmonkeydigital.com', // Cambia esto a la URL de tu frontend en Hostinger
     methods: ['GET', 'POST']
   }
 });
