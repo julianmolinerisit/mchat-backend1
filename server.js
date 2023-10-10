@@ -140,10 +140,9 @@ app.get('/rooms', (req, res)=> {
   res.json(rooms)
 })
 
-// Middleware para redirigir solicitudes no coincidentes a la página principal de React
+
 app.get('*', (req, res) => {
-  // Redirige a la ubicación del archivo index.html en tu servidor de hosting
-  res.redirect('http://brandmonkeydigital.com/');
+  res.sendFile(path.join(__dirname, 'http://brandmonkeydigital.com/', 'index.html'));
 });
 
 
