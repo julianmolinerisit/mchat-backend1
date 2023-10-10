@@ -10,6 +10,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 const twilio = require('twilio');
 const chatGptKey = process.env.CHATGPT_KEY;
+const path = require('path');
 
 
 const { PORT, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
@@ -138,6 +139,11 @@ io.on('connection', (socket)=> {
 app.get('/rooms', (req, res)=> {
   res.json(rooms)
 })
+
+// Middleware para redirigir solicitudes no coincidentes a la página principal de React
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 
 server.listen(PORT, ()=> {
