@@ -10,7 +10,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 const twilio = require('twilio');
 const chatGptKey = process.env.CHATGPT_KEY;
-const path = require('path');
+
 
 const { PORT, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
 
@@ -23,18 +23,13 @@ app.use(cors());
 app.use('/users', userRoutes);
 require('./connection');
 
-const https = require('https'); // Importar el módulo HTTPS
-const fs = require('fs'); // Importar el módulo 'fs' para trabajar con archivos
-
-const server = https.createServer (app);
-
+const server = require('http').createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'https://brandmonkeydigital.com', // Cambia a tu dominio en producción
+    origin: 'http://localhost:3000',
     methods: ['GET', 'POST']
   }
 });
-
 
 app.post("/verify/:phoneNumber", async (req, res) => {
   try {
@@ -143,6 +138,7 @@ io.on('connection', (socket)=> {
 app.get('/rooms', (req, res)=> {
   res.json(rooms)
 })
+
 
 server.listen(PORT, ()=> {
   console.log('listening to port', PORT)
