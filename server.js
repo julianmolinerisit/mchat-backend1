@@ -12,7 +12,6 @@ const twilio = require('twilio');
 const chatGptKey = process.env.CHATGPT_KEY;
 const path = require('path');
 
-
 const { PORT, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
 
 const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
@@ -24,10 +23,11 @@ app.use(cors());
 app.use('/users', userRoutes);
 require('./connection');
 
-const server = require('http').createServer(app);
+const server = https.createServer(options, app);
+
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'https://brandmonkeydigital.com', // Cambia a tu dominio en producción
     methods: ['GET', 'POST']
   }
 });
