@@ -140,14 +140,6 @@ app.get('/rooms', (req, res)=> {
   res.json(rooms)
 })
 
-
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public_html', 'index.html'));
-});
-
-
-
-
 server.listen(PORT, ()=> {
   console.log('listening to port', PORT)
 })
