@@ -23,6 +23,9 @@ app.use(cors());
 app.use('/users', userRoutes);
 require('./connection');
 
+const https = require('https'); // Importar el módulo HTTPS
+const fs = require('fs'); // Importar el módulo 'fs' para trabajar con archivos
+
 const server = https.createServer(options, app);
 
 const io = require('socket.io')(server, {
