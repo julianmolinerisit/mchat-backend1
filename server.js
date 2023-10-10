@@ -17,7 +17,10 @@ const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'https://brandmonkeydigital.com', // Reemplaza con la URL de tu sitio en Hostinger
+  methods: ['GET', 'POST'],
+}));
 
 app.use('/users', userRoutes);
 require('./connection');
@@ -25,7 +28,7 @@ require('./connection');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://localhost:3000', // Esto puede necesitar ajustarse para Render
+    origin: 'https://brandmonkeydigital.com', // Reemplaza con la URL de tu sitio en Hostinger
     methods: ['GET', 'POST']
   }
 });
