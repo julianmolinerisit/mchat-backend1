@@ -11,8 +11,7 @@ dotenv.config();
 const twilio = require('twilio');
 const chatGptKey = process.env.CHATGPT_KEY;
 
-
-const { PORT, TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
+const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SERVICE_SID } = process.env;
 
 const twilioClient = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
@@ -26,7 +25,7 @@ require('./connection');
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: 'http://localhost:3000', // Esto puede necesitar ajustarse para Render
     methods: ['GET', 'POST']
   }
 });
@@ -49,7 +48,6 @@ app.post("/verify/:phoneNumber", async (req, res) => {
   }
 });
 
-
 app.post('/check/:phoneNumber/:code', async (req, res) => {
   try {
       const { phoneNumber, code } = req.params;
@@ -67,24 +65,23 @@ app.post('/check/:phoneNumber/:code', async (req, res) => {
   }
 });
 
-
-async function getLastMessagesFromRoom(room){
+async function getLastMessagesFromRoom(room) {
   let roomMessages = await Message.aggregate([
-    {$match: {to: room}},
-    {$group: {_id: '$date', messagesByDate: {$push: '$$ROOT'}}}
+    { $match: { to: room } },
+    { $group: { _id: '$date', messagesByDate: { $push: '$$ROOT' } } }
   ])
   return roomMessages;
 }
 
-function sortRoomMessagesByDate(messages){
-  return messages.sort(function(a, b){
+function sortRoomMessagesByDate(messages) {
+  return messages.sort(function(a, b) {
     let date1 = a._id.split('/');
     let date2 = b._id.split('/');
 
-    date1 = date1[2] + date1[0] + date1[1]
+    date1 = date1[2] + date1[0] + date1[1];
     date2 =  date2[2] + date2[0] + date2[1];
 
-    return date1 < date2 ? -1 : 1
+    return date1 < date2 ? -1 : 1;
   })
 }
 
@@ -95,16 +92,16 @@ io.on('connection', (socket)=> {
 
   socket.on('new-user', async ()=> {
     const members = await User.find();
-    io.emit('new-user', members)
-  })
+    io.emit('new-user', members);
+  });
 
   socket.on('join-room', async(newRoom, previousRoom)=> {
     socket.join(newRoom);
     socket.leave(previousRoom);
     let roomMessages = await getLastMessagesFromRoom(newRoom);
     roomMessages = sortRoomMessagesByDate(roomMessages);
-    socket.emit('room-messages', roomMessages)
-  })
+    socket.emit('room-messages', roomMessages);
+  });
 
   socket.on('message-room', async(room, content, sender, time, date) => {
     const newMessage = await Message.create({content, from: sender, time, date, to: room});
@@ -112,9 +109,8 @@ io.on('connection', (socket)=> {
     roomMessages = sortRoomMessagesByDate(roomMessages);
     // sending message to room
     io.to(room).emit('room-messages', roomMessages);
-    socket.broadcast.emit('notifications', room)
-  })
-  
+    socket.broadcast.emit('notifications', room);
+  });
 
   app.delete('/logout', async(req, res)=> {
     try {
@@ -128,22 +124,19 @@ io.on('connection', (socket)=> {
       res.status(200).send();
     } catch (e) {
       console.log(e);
-      res.status(400).send()
+      res.status(400).send();
     }
-  })
+  });
 
-})
-
+});
 
 app.get('/rooms', (req, res)=> {
-  res.json(rooms)
-})
+  res.json(rooms);
+});
 
-
-server.listen(PORT, ()=> {
-  console.log('listening to port', PORT)
-})
-
+server.listen(process.env.PORT, ()=> {
+  console.log('Aplicación escuchando en el puerto', process.env.PORT);
+});
 
 const CHATGPT_KEY = chatGptKey;
 
@@ -156,7 +149,6 @@ app.post('/chatgpt', async (req, res) => {
     "response": callGptResponse
   });
 });
-
 
 async function callToChatGpt(message) {
   const bodyRequest = {
