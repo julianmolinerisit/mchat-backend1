@@ -142,8 +142,9 @@ app.get('/rooms', (req, res)=> {
 
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'http://brandmonkeydigital.com', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public_html', 'index.html'));
 });
+
 
 
 server.listen(PORT, ()=> {
