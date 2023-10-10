@@ -142,7 +142,7 @@ app.get('/rooms', (req, res)=> {
 
 // Middleware para redirigir solicitudes no coincidentes a la página principal de React
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '/'));
 });
 
 
