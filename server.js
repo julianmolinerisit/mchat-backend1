@@ -30,7 +30,7 @@ const server = https.createServer (app);
 
 const io = require('socket.io')(server, {
   cors: {
-    origin: 'https://brandmonkeydigital.com', // Cambia a tu dominio en producción
+    origin: '*', // Cambia a tu dominio en producción
     methods: ['GET', 'POST']
   }
 });
