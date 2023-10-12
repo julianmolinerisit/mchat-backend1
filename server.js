@@ -19,7 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors({
   origin: 'https://brandmonkeydigital.com', // Reemplaza con la URL de tu sitio en Hostinger
-  methods: ['GET', 'POST'],
+  methods: ['GET', 'POST', 'DELETE'], // Agrega 'DELETE' a los métodos permitidos
+
 }));
 
 app.use('/users', userRoutes);
